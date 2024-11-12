@@ -1,0 +1,49 @@
+backend: ket
+batch_size: 50
+benchmark_estimator: true
+detection: local_r
+from_checkpoint: false
+gamma_dephasing: null
+interaction: local_rx
+k: 2
+l2_regularization: 0.0
+loss_fi: loss_cfi
+lr_circ: 0.001
+lr_nn: 0.001
+metrics:
+- entropy_vn
+- qfi
+n: 2
+n_ancilla: null
+n_epochs: 1000
+n_grid: 100
+n_phis: 100
+n_sequences:
+- 1
+- 10
+- 100
+- 1000
+n_shots: 5000
+n_shots_test: 1000
+n_steps: 1000
+n_trials: 100
+nn_dims:
+- 32
+- 32
+phi_center: 0.0
+phi_fi: 1.147
+phi_range:
+- -1.157
+- 1.157
+phis_inds:
+- 50
+phis_test:
+- 0
+- 1.157
+preparation: hardware_efficient_ansatz
+sample_circuit: true
+sample_circuit_testing_data: true
+sample_circuit_training_data: true
+seed: 1730313377350869800
+train_circuit: true
+train_nn: true

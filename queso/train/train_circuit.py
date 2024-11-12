@@ -29,12 +29,12 @@ from queso.io import IO
 from queso.configs import Configuration
 
 
-# %%
+# %% The core function responsible for training a quantum circuit.
 def train_circuit(
     io: IO,
     config: Configuration,
     key: jax.random.PRNGKey,
-    plot: bool = False,
+    plot: bool = True,
     progress: bool = True,
 ):
     """
@@ -58,7 +58,7 @@ def train_circuit(
     """
     jax.config.update("jax_default_device", jax.devices(os.getenv("DEFAULT_DEVICE_TRAIN_CIRC", "cpu"))[0])
 
-    # %%
+    # %% Sensor Parameters
     n = config.n
     k = config.k
     phi_range = config.phi_range
@@ -74,24 +74,16 @@ def train_circuit(
         gamma_dephasing=config.gamma_dephasing,
     )
 
-    # %%
+    # %% Sensor Initialization
     print(f"Initializing sensor n={n}, k={k}")
     sensor = Sensor(n, k, **kwargs)
     phi = jnp.array(config.phi_fi)
+    print(f"initial phi = {phi}")
     theta = jax.random.uniform(key, shape=sensor.theta.shape)
     mu = jax.random.uniform(key, shape=sensor.mu.shape)
 
-    # %%
-    print(f"plot = {plot}")
-    if plot:
-        try:
-            fig = sensor.circuit(theta, phi, mu).draw(**dict(output="mpl"))
-            io.save_figure(fig, filename="circuit")
-            fig.show()
-        except:
-            pass
 
-    # %%
+    # %% Loss Functions and Optimizer Setup
     optimizer = optax.adam(learning_rate=lr)
 
     def loss_cfi(params, phi):
@@ -100,7 +92,7 @@ def train_circuit(
     def loss_qfi(params, phi):
         return -sensor.qfi(params["theta"], phi)
 
-    # %%
+    # %% Training Step with JAX's JIT Compilation
     @jax.jit
     def step(params, opt_state):
         val, grads = loss_val_grad(params, phi)
@@ -108,7 +100,7 @@ def train_circuit(
         params = optax.apply_updates(params, updates)
         return val, params, updates, opt_state
 
-    # %%
+    # %% Loss Function Selection and Initialization
     if config.loss_fi == "loss_cfi":
         loss = loss_cfi
         params = {"theta": theta, "mu": mu}
@@ -142,7 +134,7 @@ def train_circuit(
                     raise RuntimeError("State should always have 1 or 2 dims.")
                 metrics[metric].append(fid)
 
-    #%%
+    #%% Training Loop with Progress Display
     metrics = {metric: [] for metric in config.metrics}
     losses = []
     if (sensor.theta is None) and (sensor.mu is None):
@@ -173,6 +165,15 @@ def train_circuit(
         hf.create_dataset(metric, data=arr)
     hf.close()
 
+    # %% Plotting Circuit Structure
+    print(f"plot = {plot}")
+    if plot:
+        try:
+            fig = sensor.circuit(theta, phi, mu).draw(**dict(output="mpl"))
+            io.save_figure(fig, filename="circuit")
+            fig.show()
+        except:
+            pass
     # %% compute other quantities of interest and save
     phis = (phi_range[1] - phi_range[0]) * jnp.arange(n_phis) / (
         n_phis - 1
@@ -226,13 +227,13 @@ def train_circuit(
 
         # #%%
         # fig, axs = plt.subplots(ncols=1, nrows=2, sharex=True)
-        # # axs[0].plot(phis / jnp.pi, qfi_phis)
+        # axs[0].plot(phis / jnp.pi, qfi_phis)
         # axs[1].plot(phis / jnp.pi, cfi_phis)
-        # # axs[0].set(ylabel="QFI")
+        # axs[0].set(ylabel="QFI")
         # axs[1].set(ylabel="CFI")
         # axs[-1].set(xlabel=r"$\phi$ (rad/$\pi$)")
-        # # for ax in axs:
-        # #     ax.set(ylim=[0, 1.1 * n**2])
+        # for ax in axs:
+        #     ax.set(ylim=[0, 1.1 * n**2])
         # io.save_figure(fig, filename="qfi-cfi-phi")
         # fig.show()
 
@@ -246,11 +247,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", type=str, default="tmp")
     args = parser.parse_args()
-    folder = args.folder
-
+    folder = 'C:/Users/tvle2/Documents/Code/queso/data'
     io = IO(folder=f"{folder}")
-    print(io)
-    config = Configuration.from_yaml(io.path.joinpath("config.yaml"))
+    # config = Configuration.from_yaml(io.path.joinpath("config.yaml"))
+    config = Configuration.from_yaml("C:/Users/tvle2/Documents/Code/queso/config/config.yaml")
     key = jax.random.PRNGKey(config.seed)
     print(f"Training circuit: {folder} | Devices {jax.devices()} | Full path {io.path}")
     print(f"Config: {config}")

@@ -45,7 +45,7 @@ def vqs(io: IO, config: Configuration):
     progress = True
     plot = True
 
-    # %%
+    # %% Train Circuit
     _, key = jax.random.split(key)
     if config.train_circuit:
         train_circuit(
@@ -107,11 +107,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", type=str, default="tmp")
     args = parser.parse_args()
-    folder = args.folder
+    # folder = args.folder
+    folder = 'C:/Users/tvle2/Documents/Code/queso/data'
 
     io = IO(folder=f"{folder}")
     print(io)
-    config = Configuration.from_yaml(io.path.joinpath('config.yaml'))
+    # config = Configuration.from_yaml(io.path.joinpath('config.yaml'))
+    config = Configuration.from_yaml("C:/Users/tvle2/Documents/Code/queso/config/config.yaml")
     print(f"Initializing sensor training: {folder} | Devices {jax.devices()} | Full path {io.path}")
     print(f"Config: {config}")
     vqs(io, config)

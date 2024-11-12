@@ -95,7 +95,7 @@ def benchmark_estimator(
     io: IO,
     config: Configuration,
     key: jax.random.PRNGKey = None,
-    plot: bool = False,
+    plot: bool = True,
 ):
     """
     Benchmarks the estimator.
@@ -202,75 +202,75 @@ def benchmark_estimator(
     hf.close()
 
     # #%% plot updated posterior distribution for n_trials different sequence samples
-    # ncols = phis_test.size
-    # nrows = 8
-    # if plot:
-    #     fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(3.5*ncols, 1.5 * nrows),
-    #                             sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0))
-    #     colors = sns.color_palette('crest', n_colors=n_sequences.shape[0])
-    #
-    #     for k in range(ncols):
-    #         z = k * (phis_true.shape[0] // ncols)
-    #         print(f"Closest grid point is {jnp.min(jnp.abs(phis - phis_true[z]))} rads away")
-    #         for j in range(nrows):
-    #             for i, n_sequence in enumerate(n_sequences):
-    #                 # print(k, j, i)
-    #                 ax = axs[j, k]
-    #                 ax.axvline(phis_estimates[j, z, -1], color='red', ls='-', lw=1, alpha=1.0)
-    #                 ax.axvline(phis_true[z], color='gray', ls='--', lw=1, alpha=0.6)
-    #                 p = posteriors[j, z, i, :]
-    #                 ax.plot(
-    #                     grid,
-    #                     p / jnp.max(p),
-    #                     ls='-',
-    #                     lw=1,
-    #                     color=colors[i],
-    #                     alpha=(i+1) / len(n_sequences),
-    #                 )
-    #                 b = phis_true[z] - phis_estimates[j, z, -1]
-    #                 ax.annotate(text=f"{b:2.6f}",
-    #                             xy=(0.9, 0.9),
-    #                             xycoords='axes fraction',
-    #                             **dict(ha='right', va='top'))
-    #                 ax.set(xticks=[], yticks=[])
-    #
-    #     io.save_figure(fig, 'trials_n_sequences_m_phases.pdf')
-    #     del fig
+    ncols = phis_test.size
+    nrows = 8
+    if plot:
+        fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(3.5*ncols, 1.5 * nrows),
+                                sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0))
+        colors = sns.color_palette('crest', n_colors=n_sequences.shape[0])
+    
+        for k in range(ncols):
+            z = k * (phis_true.shape[0] // ncols)
+            print(f"Closest grid point is {jnp.min(jnp.abs(phis - phis_true[z]))} rads away")
+            for j in range(nrows):
+                for i, n_sequence in enumerate(n_sequences):
+                    # print(k, j, i)
+                    ax = axs[j, k]
+                    ax.axvline(phis_estimates[j, z, -1], color='red', ls='-', lw=1, alpha=1.0)
+                    ax.axvline(phis_true[z], color='gray', ls='--', lw=1, alpha=0.6)
+                    p = posteriors[j, z, i, :]
+                    ax.plot(
+                        grid,
+                        p / jnp.max(p),
+                        ls='-',
+                        lw=1,
+                        color=colors[i],
+                        alpha=(i+1) / len(n_sequences),
+                    )
+                    b = phis_true[z] - phis_estimates[j, z, -1]
+                    ax.annotate(text=f"{b:2.6f}",
+                                xy=(0.9, 0.9),
+                                xycoords='axes fraction',
+                                **dict(ha='right', va='top'))
+                    ax.set(xticks=[], yticks=[])
+    
+        io.save_figure(fig, 'trials_n_sequences_m_phases.pdf')
+        # del fig
 
     # #%%
-    # if plot:
-    #     ncols = 1
-    #     nrows = n_trials
-    #
-    #     fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(3.5 * ncols, 1.5 * nrows), sharex=True, sharey=True,
-    #                             gridspec_kw=dict(hspace=0, wspace=0))
-    #     colors = sns.color_palette('crest', n_colors=n_sequences.shape[0])
-    #     k = phis_true.shape[0] // 2
-    #     print(f"Closest grid point is {jnp.min(jnp.abs(phis - phis_true[z]))}")
-    #     for j in range(nrows):
-    #         for i, n_sequence in enumerate(n_sequences):
-    #             # print(k, j, i)
-    #             ax = axs[j]
-    #             ax.axvline(phis_estimates[j, k, -1], color='red', ls='-', lw=1, alpha=1.0)
-    #             ax.axvline(phis_true[k], color='gray', ls='--', lw=1, alpha=0.6)
-    #             p = posteriors[j, k, i, :]
-    #             ax.plot(
-    #                 grid,
-    #                 p / jnp.max(p),
-    #                 ls='-',
-    #                 lw=1,
-    #                 color=colors[i],
-    #                 alpha=(i + 1) / len(n_sequences),
-    #             )
-    #             b = phis_true[k] - phis_estimates[j, k, -1]
-    #             ax.annotate(text=f"{b:2.6f}",
-    #                         xy=(0.9, 0.9),
-    #                         xycoords='axes fraction',
-    #                         **dict(ha='right', va='top'))
-    #             ax.set(xticks=[], yticks=[])
-    #
-    #     io.save_figure(fig, 'all_trials_one_phase.pdf')
-    #     del fig
+    if plot:
+        ncols = 1
+        nrows = n_trials
+    
+        fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(3.5 * ncols, 1.5 * nrows), sharex=True, sharey=True,
+                                gridspec_kw=dict(hspace=0, wspace=0))
+        colors = sns.color_palette('crest', n_colors=n_sequences.shape[0])
+        k = phis_true.shape[0] // 2
+        print(f"Closest grid point is {jnp.min(jnp.abs(phis - phis_true[z]))}")
+        for j in range(nrows):
+            for i, n_sequence in enumerate(n_sequences):
+                # print(k, j, i)
+                ax = axs[j]
+                ax.axvline(phis_estimates[j, k, -1], color='red', ls='-', lw=1, alpha=1.0)
+                ax.axvline(phis_true[k], color='gray', ls='--', lw=1, alpha=0.6)
+                p = posteriors[j, k, i, :]
+                ax.plot(
+                    grid,
+                    p / jnp.max(p),
+                    ls='-',
+                    lw=1,
+                    color=colors[i],
+                    alpha=(i + 1) / len(n_sequences),
+                )
+                b = phis_true[k] - phis_estimates[j, k, -1]
+                ax.annotate(text=f"{b:2.6f}",
+                            xy=(0.9, 0.9),
+                            xycoords='axes fraction',
+                            **dict(ha='right', va='top'))
+                ax.set(xticks=[], yticks=[])
+    
+        io.save_figure(fig, 'all_trials_one_phase.pdf')
+        # del fig
     #
     #%% plot posterior, bias, and variance for one phase
     for k in range(phis_true.shape[0]):
@@ -340,10 +340,10 @@ if __name__ == "__main__":
     parser.add_argument("--folder", type=str, default="tmp")
     args = parser.parse_args()
     folder = args.folder
-
     io = IO(folder=f"{folder}")
     print(io)
-    config = Configuration.from_yaml(io.path.joinpath("config.yaml"))
+    # config = Configuration.from_yaml(io.path.joinpath("config.yaml"))
+    config = Configuration.from_yaml("C:/Users/tvle2/Documents/Code/queso/config/config.yaml")
     key = jax.random.PRNGKey(config.seed)
     print(f"Benchmarking NN: {folder} | Devices {jax.devices()} | Full path {io.path}")
     print(f"Config: {config}")

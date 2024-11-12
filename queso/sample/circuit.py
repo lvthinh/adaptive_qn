@@ -142,11 +142,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", type=str, default="tmp")
     args = parser.parse_args()
-    folder = args.folder
+    # folder = args.folder
+
+    folder = 'C:/Users/tvle2/Documents/Code/queso/data'
 
     io = IO(folder=f"{folder}")
     print(io)
-    config = Configuration.from_yaml(io.path.joinpath("config.yaml"))
+    # config = Configuration.from_yaml(io.path.joinpath("config.yaml"))
+    config = Configuration.from_yaml("C:/Users/tvle2/Documents/Code/queso/config/config.yaml")
     key = jax.random.PRNGKey(config.seed)
     print(f"Sampling circuit: {folder} | Devices {jax.devices()} | Full path {io.path}")
     print(f"Config: {config}")

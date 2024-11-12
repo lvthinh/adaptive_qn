@@ -72,7 +72,7 @@ def train_nn(
     """
     jax.config.update("jax_default_device", jax.devices(os.getenv("DEFAULT_DEVICE_TRAIN_NN", "cpu"))[0])
 
-    # %%
+    # %% Neural Network Configuration
     nn_dims = config.nn_dims + [config.n_grid]
     n_grid = config.n_grid
     lr = config.lr_nn
@@ -82,17 +82,18 @@ def train_nn(
     from_checkpoint = config.from_checkpoint
     logit_norm = False
 
-    # %% extract data from H5 file
+    # %% extract data from H5 file 
     t0 = time.time()
 
     hf = h5py.File(io.path.joinpath("train_samples.h5"), "r")
+    print(f"hf = {hf}")
     shots = jnp.array(hf.get("shots"))
     counts = jnp.array(hf.get("counts"))
     probs = jnp.array(hf.get("probs"))
     phis = jnp.array(hf.get("phis"))
     hf.close()
 
-    # %%
+    # %% 
     n = shots.shape[2]
     n_shots = shots.shape[1]
     n_phis = shots.shape[0]
@@ -102,7 +103,7 @@ def train_nn(
     n_batches = n_shots // batch_size
     n_steps = n_epochs * n_batches
 
-    # %%
+    # %% Grid Creation
     dphi = phis[1] - phis[0]
     phi_range = (jnp.min(phis), jnp.max(phis))
 
@@ -119,7 +120,7 @@ def train_nn(
     print(index)
     print(labels.sum(axis=0))
 
-    # %%
+    # %% Initializes the BayesianDNN model
     model = BayesianDNNEstimator(nn_dims)
 
     x = shots
@@ -136,15 +137,16 @@ def train_nn(
     x_init = x[1:10, 1:10, :]
     print(model.tabulate(jax.random.PRNGKey(0), x_init))
 
-    # %%
+    # %% L2 Loss Function
     def l2_loss(w, alpha):
         return alpha * (w**2).mean()
 
+    # %% Train step
     @jax.jit
     def train_step(state, batch):
         x_batch, y_batch = batch
 
-        def loss_fn(params):
+        def loss_fn(params): #Computes the cross-entropy loss between predicted logits and true labels.
             logits = state.apply_fn({"params": params}, x_batch)
             # loss = optax.softmax_cross_entropy(
             #     logits,
@@ -223,14 +225,14 @@ def train_nn(
     state = create_train_state(model, init_key, x_init, learning_rate=lr)
     # del init_key
 
-    # %%
+    # %% 
     x_batch = x[:, 0:batch_size, :]
     y_batch = y
     batch = (x_batch, y_batch)
 
     state, loss = train_step(state, batch)
 
-    # %%
+    # %% Traning Loop
     keys = jax.random.split(key, (n_epochs))
     metrics = []
     pbar = tqdm.tqdm(
@@ -391,11 +393,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", type=str, default="tmp")
     args = parser.parse_args()
-    folder = args.folder
+    folder ='C:/Users/tvle2/Documents/Code/queso/data'
 
     io = IO(folder=f"{folder}")
     print(io)
-    config = Configuration.from_yaml(io.path.joinpath("config.yaml"))
+    # config = Configuration.from_yaml(io.path.joinpath("config.yaml"))
+    config = Configuration.from_yaml("C:/Users/tvle2/Documents/Code/queso/config/config.yaml")
     key = jax.random.PRNGKey(config.seed)
     print(f"Training NN: {folder} | Devices {jax.devices()} | Full path {io.path}")
     print(f"Config: {config}")

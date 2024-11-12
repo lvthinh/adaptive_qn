@@ -264,7 +264,7 @@ if __name__ == "__main__":
         detection="hadamard_bases",
         seed=123,
         gamma_dephasing=0.0,
-        backend="ket",
+        backend="dm",
         phi_fi=0.1,
     )
     config.phi_center = jnp.pi / 2 / n
